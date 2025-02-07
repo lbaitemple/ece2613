@@ -14,7 +14,7 @@ sudo reboot
 - create a xilinx account at https://www.amd.com/en/registration/create-account.html
 - activate your acccount
 - open x-windows in cloud9
-- run the following commands
+- run the following commands and make sure you install the package in /opt/xilinx folder
   
   ```
   cd ~/environment/ece2613
