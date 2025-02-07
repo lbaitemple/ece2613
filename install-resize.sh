@@ -1,6 +1,6 @@
 #!/bin/bash
  
-SIZE=100 # Change from the default 8GB to 20GB
+SIZE=200 # Change from the default 8GB to 20GB
 
 # Get the ID of the environment host Amazon EC2 instance.
 INSTANCEID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
