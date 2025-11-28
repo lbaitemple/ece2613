@@ -18,19 +18,12 @@ export class SVFParser {
             // Commands end with semicolon
             if (line.endsWith(';')) {
                 const trimmed = currentCommand.trim();
-                
-                // Debug: log long commands
-                if (trimmed.length > 10000) {
-                    console.log(`Parsing long command at line ${lineCount}, length: ${trimmed.length} chars`);
-                }
-                
                 const cmd = this.parseCommand(trimmed);
                 if (cmd) commands.push(cmd);
                 currentCommand = '';
             }
         }
         
-        console.log(`Total commands parsed: ${commands.length}`);
         return commands;
     }
     
@@ -121,18 +114,6 @@ export class SVFParser {
         if (rawMask) cmd.mask = this.parseHexData(rawMask, bitLength);
         if (rawSMask) cmd.smask = this.parseHexData(rawSMask, bitLength);
         
-        // Log large data transfers
-        if (bitLength > 10000) {
-            console.log(`Parsed ${type} ${bitLength} bits (${Math.ceil(bitLength/8)} bytes), TDI length: ${cmd.tdi ? cmd.tdi.length : 0}`);
-            // Log first and last bytes for verification
-            if (cmd.tdi) {
-                const first8 = Array.from(cmd.tdi.slice(0, 8)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' ');
-                const last8 = Array.from(cmd.tdi.slice(-8)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' ');
-                console.log(`  First 8 bytes: ${first8}`);
-                console.log(`  Last 8 bytes:  ${last8}`);
-            }
-        }
-        
         return cmd;
     }
     
@@ -210,21 +191,11 @@ export class SVFParser {
         const byteLength = Math.max(providedBytes, targetBytes);
         const bytes = new Uint8Array(byteLength);
 
-        // Debug: log for large data
-        if (bitLength > 10000) {
-            console.log(`parseHexData: hexStr length=${hexStr.length}, first 20 chars: "${hexStr.substring(0, 20)}", last 20 chars: "${hexStr.substring(hexStr.length - 20)}"`);
-        }
-
-        // openFPGALoader parse_hex reads from END of string to BEGINNING
-        // and places into bytes[0], bytes[1], etc.
-        // So rightmost hex chars go to lowest byte index
-        // For "567F00000000": bytes[0]=0x00, bytes[1]=0x00, bytes[2]=0x00, bytes[3]=0x7F, bytes[4]=0x56
+        // Read from END of string to BEGINNING (LSB first)
         for (let i = 0; i < providedBytes; i++) {
-            // Read from end of string
             const hexIndex = hexStr.length - 2 - (i * 2);
             const pair = hexStr.slice(hexIndex, hexIndex + 2);
-            const value = parseInt(pair, 16) || 0;
-            bytes[i] = value;
+            bytes[i] = parseInt(pair, 16) || 0;
         }
 
         return bytes;

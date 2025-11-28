@@ -206,14 +206,9 @@ export class USBBlasterII {
         const numBytes = Math.ceil(bitLength / 8);
         const bitsInLastByte = bitLength % 8 || 8;
         
-        console.log(`shiftBytes: ${bitLength} bits (${numBytes} bytes), last byte has ${bitsInLastByte} bits`);
-        
-        // Debug: show data pattern
-        if (bitLength > 100000) {
-            const first16 = Array.from(tdiBytes.slice(0, 16)).map(b => b.toString(16).padStart(2, '0')).join('');
-            const last16 = Array.from(tdiBytes.slice(-16)).map(b => b.toString(16).padStart(2, '0')).join('');
-            console.log(`  Data first 16 bytes: ${first16}`);
-            console.log(`  Data last 16 bytes: ${last16}`);
+        // Only log for very large transfers
+        if (bitLength > 1000000) {
+            console.log(`shiftBytes: ${bitLength} bits (${numBytes} bytes)`);
         }
 
         // Shift all complete bytes except possibly the last one using byte-shift mode
@@ -262,87 +257,79 @@ export class USBBlasterII {
 
     /**
      * Raw byte-shift without any bit-banging. Used for the bulk of the data.
-     * openFPGALoader sends a bit-bang command first to set state before byte-shift.
+     * OPTIMIZED: Batches multiple byte-shift commands into larger USB packets.
      */
     async shiftBytesRaw(tdiBytes, startByte, numBytes) {
         const MAX_BYTES_PER_CMD = 63;
+        const MAX_USB_PACKET = 4096;  // Larger USB packet for efficiency
         const base = 0x2C;
         
-        // Send bit-bang setup first (openFPGALoader: DEFAULT | DO_WRITE | DO_BITBB)
-        // This ensures the device is in the right state for byte-shift
+        // Send bit-bang setup first
         await this.device.transferOut(this.endpointOut.endpointNumber, new Uint8Array([base]));
         
-        let isFirstPacket = true;
         const startTime = Date.now();
+        let byteOffset = 0;
         
-        for (let byteOffset = 0; byteOffset < numBytes; byteOffset += MAX_BYTES_PER_CMD) {
-            const bytesInThisPacket = Math.min(MAX_BYTES_PER_CMD, numBytes - byteOffset);
+        // Pre-allocate a large buffer for batching
+        const batchBuffer = new Uint8Array(MAX_USB_PACKET);
+        
+        while (byteOffset < numBytes) {
+            let batchPos = 0;
             
-            // Build command byte: 0x80 | num_bytes (NOT num_bytes - 1!)
-            // openFPGALoader uses tx_len directly: mask | (tx_len & 0x3f)
-            const cmdByte = 0x80 | (bytesInThisPacket & 0x3f);
-            
-            // Extract the TDI bytes for this packet
-            const packetData = tdiBytes.slice(startByte + byteOffset, startByte + byteOffset + bytesInThisPacket);
-            
-            // Debug first packet
-            if (isFirstPacket && numBytes > 100) {
-                console.log(`shiftBytesRaw: cmd=0x${cmdByte.toString(16)}, ${bytesInThisPacket} bytes, total ${numBytes} bytes`);
-                console.log(`  First 10 bytes: ${Array.from(packetData.slice(0, 10)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' ')}`);
-                isFirstPacket = false;
+            // Fill the batch buffer with multiple byte-shift commands
+            while (byteOffset < numBytes && batchPos < MAX_USB_PACKET - 64) {
+                const bytesInThisPacket = Math.min(MAX_BYTES_PER_CMD, numBytes - byteOffset);
+                const cmdByte = 0x80 | (bytesInThisPacket & 0x3f);
+                
+                batchBuffer[batchPos++] = cmdByte;
+                
+                // Copy data bytes
+                for (let i = 0; i < bytesInThisPacket; i++) {
+                    batchBuffer[batchPos++] = tdiBytes[startByte + byteOffset + i];
+                }
+                
+                byteOffset += bytesInThisPacket;
             }
             
-            // Send: [cmd, data bytes]
-            const packet = new Uint8Array(1 + bytesInThisPacket);
-            packet[0] = cmdByte;
-            packet.set(packetData, 1);
+            // Send the batch
+            await this.device.transferOut(this.endpointOut.endpointNumber, batchBuffer.slice(0, batchPos));
             
-            // Direct write
-            await this.device.transferOut(this.endpointOut.endpointNumber, packet);
-            
-            // Drain buffer periodically
-            if (byteOffset > 0 && (byteOffset % (MAX_BYTES_PER_CMD * 2)) === 0) {
+            // Drain buffer less frequently - every 32KB
+            if (byteOffset > 0 && (byteOffset % 32768) === 0) {
                 try {
                     await Promise.race([
                         this.device.transferIn(this.endpointIn.endpointNumber, 64),
-                        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 50))
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10))
                     ]);
-                } catch (e) {
-                    // Timeout is fine
-                }
+                } catch (e) { /* ignore */ }
             }
         }
         
-        // Log completion for large transfers
-        if (numBytes > 1000) {
+        // Log only for large transfers
+        if (numBytes > 100000) {
             const elapsed = Date.now() - startTime;
-            console.log(`shiftBytesRaw complete: ${numBytes} bytes in ${elapsed}ms (${(numBytes * 1000 / elapsed / 1024).toFixed(1)} KB/s)`);
+            console.log(`shiftBytesRaw: ${numBytes} bytes in ${elapsed}ms (${(numBytes * 1000 / elapsed / 1024).toFixed(1)} KB/s)`);
         }
     }
 
     /**
      * Toggle TCK for a given number of cycles with TMS=0, TDI=0
-     * Used for RUNTEST command
+     * Used for RUNTEST command - OPTIMIZED for speed
      */
     async toggleClockCycles(cycles) {
         if (!this.device || cycles <= 0) return;
 
-        // openFPGALoader sends a bit-bang command first to set state,
-        // then uses byte-shift mode for efficiency
         const base = 0x2C;
-        
-        // Send single bit-bang to establish state (TMS=0, TDI=0, TCK=0)
         await this.device.transferOut(this.endpointOut.endpointNumber, new Uint8Array([base]));
         
-        // Use byte-shift mode with all zeros for the bulk
         const numBytes = Math.ceil(cycles / 8);
-        const zeros = new Uint8Array(numBytes);  // All zeros
         
-        if (cycles > 1000) {
-            console.log(`toggleClockCycles: ${cycles} cycles (${numBytes} bytes)`);
+        // Reuse static zero buffer for common sizes
+        if (!this._zeroBuffer || this._zeroBuffer.length < numBytes) {
+            this._zeroBuffer = new Uint8Array(Math.max(numBytes, 65536));
         }
         
-        await this.shiftBytesRaw(zeros, 0, numBytes);
+        await this.shiftBytesRaw(this._zeroBuffer, 0, numBytes);
     }
 
     async shiftBits(tdiBits, tmsBits, bitLength, capture = false) {
@@ -350,31 +337,24 @@ export class USBBlasterII {
             throw new Error('Device not connected');
         }
 
-        // USB-Blaster supports two modes:
-        // 1. Byte-shift mode (0xbf): fast, shifts 64 bits at once, but TMS must be 0
-        // 2. Bit-bang mode: slower, but supports any TMS pattern
-        
-        // Strategy: use byte-shift for long runs of TMS=0, bit-bang for everything else
+        // For small transfers (state navigation, etc), use efficient bit-bang
+        // Build all command bytes first, then send in one transfer
         let bitIndex = 0;
-        const resultBits = [];
+        const resultBits = capture ? [] : null;
         
         while (bitIndex < bitLength) {
-            // Check if we can use byte-shift mode (requires TMS=0 for next bits)
-            // Byte-shift mode (0x80) is WRITE-ONLY. If capturing, we must use bit-bang.
             const canUseByteshiftMode = !capture && this.canUseByteshiftMode(tmsBits, bitIndex, bitLength);
             
-            // Use byte-shift if we have at least 64 bits (8 bytes) with TMS=0
-            // This avoids switching modes for small transfers which might be less stable
-            if (canUseByteshiftMode && (bitLength - bitIndex) >= 64) {
-                // Calculate how many complete bytes we can shift
+            // Lower threshold for byte-shift (16 bits instead of 64)
+            if (canUseByteshiftMode && (bitLength - bitIndex) >= 16) {
                 const remainingBits = bitLength - bitIndex;
                 const bytesToShift = Math.floor(remainingBits / 8);
                 const bitsToShift = bytesToShift * 8;
                 await this.shiftBytewise(tdiBits, bitIndex, bitsToShift);
                 bitIndex += bitsToShift;
             } else {
-                // Use bit-bang mode - batch up to 32 bits at a time
-                const batchSize = Math.min(32, bitLength - bitIndex);
+                // Batch more bits at once (64 instead of 32)
+                const batchSize = Math.min(64, bitLength - bitIndex);
                 const batchTdo = await this.shiftBitBang(tdiBits, tmsBits, bitIndex, batchSize, capture);
                 if (capture && batchTdo) {
                     resultBits.push(...batchTdo);
@@ -401,36 +381,25 @@ export class USBBlasterII {
     
     async shiftBitBang(tdiBits, tmsBits, startIndex, bitCount, capture) {
         // Bit-bang mode: send 2 bytes per bit (setup + clock)
-        // For FT245-based USB-Blaster I, we need to batch writes and reads separately
-        const tdoBits = [];
+        // OPTIMIZED: Pre-allocate buffer, send all at once
+        const tdoBits = capture ? [] : null;
         
-        // Build all command bytes first
-        const allBytes = [];
+        // Pre-allocate buffer for all bytes
+        const allBytes = new Uint8Array(bitCount * 2);
+        let pos = 0;
+        
         for (let i = 0; i < bitCount; i++) {
             const bitIdx = startIndex + i;
-            const tdi = (tdiBits && tdiBits[bitIdx]) ? 1 : 0;
-            const tms = (tmsBits && tmsBits[bitIdx]) ? 1 : 0;
+            const tdi = (tdiBits && tdiBits[bitIdx]) ? 0x10 : 0;
+            const tms = (tmsBits && tmsBits[bitIdx]) ? 0x02 : 0;
             
-            // Build state byte: bit4=TDI, bit1=TMS, bit0=TCK
-            // Base value 0x2C (bits 2,3,5 set) keeps nCS/nCE high
-            const base = 0x2C;
-            const setupByte = base | (tdi << 4) | (tms << 1) | 0;  // TCK=0
-            let clockByte = base | (tdi << 4) | (tms << 1) | 1;  // TCK=1
-            
-            // If capturing, set Read bit (bit 6) on the clock high byte
-            if (capture) {
-                clockByte |= 0x40;
-            }
-            
-            allBytes.push(setupByte, clockByte);
+            const base = 0x2C | tdi | tms;
+            allBytes[pos++] = base;           // TCK=0
+            allBytes[pos++] = base | 0x01 | (capture ? 0x40 : 0);  // TCK=1
         }
         
-        // Send all bytes in chunks
-        const CHUNK_SIZE = 64;
-        for (let i = 0; i < allBytes.length; i += CHUNK_SIZE) {
-            const chunk = allBytes.slice(i, Math.min(i + CHUNK_SIZE, allBytes.length));
-            await this.sendCommand(new Uint8Array(chunk));
-        }
+        // Send all bytes in one transfer (up to 4KB)
+        await this.device.transferOut(this.endpointOut.endpointNumber, allBytes);
         
         // If capturing, wait a bit then read all responses
         if (capture) {

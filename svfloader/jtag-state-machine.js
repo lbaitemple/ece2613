@@ -45,11 +45,6 @@ export class JTAGStateMachine {
     }
     
     async executeCommand(cmd) {
-        // Log all SDR commands for debugging
-        if (cmd.type === 'SDR') {
-            console.log(`Executing SDR ${cmd.length} bits (${Math.ceil(cmd.length/8)} bytes), has TDI: ${!!cmd.tdi}, TDI length: ${cmd.tdi ? cmd.tdi.length : 0}`);
-        }
-        
         switch (cmd.type) {
             case 'STATE':
                 await this.moveToState(cmd.states[cmd.states.length - 1]);
@@ -157,40 +152,8 @@ export class JTAGStateMachine {
         
         // Shift data register
         if (cmd.tdi) {
-            // Debug: log first bytes of large transfers
-            if (cmd.length > 100000) {
-                const firstBytes = Array.from(cmd.tdi.slice(0, 16))
-                    .map(b => '0x' + b.toString(16).padStart(2, '0'))
-                    .join(' ');
-                // Check the transition area around byte 600 where pattern changes
-                const bytes600 = Array.from(cmd.tdi.slice(600, 616))
-                    .map(b => '0x' + b.toString(16).padStart(2, '0'))
-                    .join(' ');
-                // Also check a middle section
-                const bytesMid = Array.from(cmd.tdi.slice(Math.floor(cmd.tdi.length / 2), Math.floor(cmd.tdi.length / 2) + 16))
-                    .map(b => '0x' + b.toString(16).padStart(2, '0'))
-                    .join(' ');
-                console.log(`Shifting ${cmd.length} bits (${cmd.tdi.length} bytes)`);
-                console.log(`  First 16 bytes: ${firstBytes}`);
-                console.log(`  Bytes 600-615: ${bytes600}`);
-                console.log(`  Middle section: ${bytesMid}`);
-            }
-            
-            const shouldCapture = false; // Disable TDO capture - USB-Blaster I FT245 doesn't reliably support reads
+            const shouldCapture = false;
             const tdo = await this.shiftData(cmd.tdi, cmd.length, shouldCapture);
-            
-            // Check if TDO verification was expected
-            if (shouldCapture && cmd.tdo && cmd.mask) {
-                try {
-                    this.verifyData(tdo, cmd.tdo, cmd.mask, cmd.length);
-                    console.log(`SDR verification passed (${cmd.length} bits)`);
-                } catch (e) {
-                    console.error(`SDR verification failed: ${e.message}`);
-                    // Don't throw, just log, to allow debugging
-                }
-            } else if (cmd.tdo && cmd.mask) {
-                console.log(`Note: SDR has TDO verification (${cmd.length} bits) - skipped for large transfer`);
-            }
         }
         
         // Move to end state (ENDDR)
@@ -202,11 +165,9 @@ export class JTAGStateMachine {
             return capture ? new Uint8Array(0) : null;
         }
 
-        // For large transfers (> 1000 bits), use optimized byte-based shifting
-        // This avoids creating massive bit arrays that can cause memory issues
-        if (length > 1000 && !capture) {
+        // For transfers > 64 bits, use optimized byte-based shifting
+        if (length > 64 && !capture) {
             const result = await this.usb.shiftBytes(tdi, length);
-            // Update state: last bit had TMS=1 to exit shift state
             this.currentState = this.currentState === 'DRSHIFT' ? 'DREXIT1' : 'IREXIT1';
             return result;
         }
@@ -214,8 +175,6 @@ export class JTAGStateMachine {
         // For small transfers or when capturing, use bit-based approach
         const tdiArray = this.bytesToBits(tdi, length);
         const tmsArray = new Array(length).fill(0);
-
-        // Last bit should have TMS=1 to exit shift state
         tmsArray[length - 1] = 1;
 
         const result = await this.usb.shiftBits(tdiArray, tmsArray, length, capture);
