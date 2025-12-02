@@ -3,32 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DE10-lite SVF Loader</title>
+    <title>FPGA Programmer</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>DE10-lite SVF Loader</h1>
+        <h1>FPGA Programmer</h1>
         
-        <div class="section">
-            <h2>1. Connect Device</h2>
-            <button id="connectBtn" class="btn">Connect USB Blaster II</button>
-            <div id="deviceStatus" class="status">Not connected</div>
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="svf-tab">SVF File (Intel/Altera)</button>
+            <button class="tab-btn" data-tab="bit-tab">BIT File (Xilinx)</button>
         </div>
-
-        <div class="section">
-            <h2>2. Load SVF File</h2>
-            <input type="file" id="svfFile" accept=".svf" disabled>
-            <div id="fileInfo" class="info"></div>
-        </div>
-
-        <div class="section">
-            <h2>3. Program Device</h2>
-            <button id="programBtn" class="btn" disabled>Program Device</button>
-            <div id="progress" class="progress-container">
-                <div id="progressBar" class="progress-bar"></div>
+        
+        <!-- SVF Tab Content -->
+        <div id="svf-tab" class="tab-content active">
+            <div class="section">
+                <h2>1. Connect Device</h2>
+                <button id="connectBtn" class="btn">Connect USB Blaster</button>
+                <div id="deviceStatus" class="status">Not connected</div>
             </div>
-            <div id="status" class="status"></div>
+
+            <div class="section">
+                <h2>2. Load SVF File</h2>
+                <input type="file" id="svfFile" accept=".svf" disabled>
+                <div id="fileInfo" class="info"></div>
+            </div>
+
+            <div class="section">
+                <h2>3. Program Device</h2>
+                <button id="programBtn" class="btn" disabled>Program SRAM</button>
+                <div id="progress" class="progress-container">
+                    <div id="progressBar" class="progress-bar"></div>
+                </div>
+                <div id="status" class="status"></div>
+            </div>
+        </div>
+        
+        <!-- BIT File Tab Content -->
+        <div id="bit-tab" class="tab-content">
+            <div class="section">
+                <h2>1. Connect Device</h2>
+                <button id="connectBitBtn" class="btn">Connect JTAG Programmer</button>
+                <div id="bitDeviceStatus" class="status">Not connected</div>
+            </div>
+
+            <div class="section">
+                <h2>2. Load BIT File</h2>
+                <input type="file" id="bitFile" accept=".bit,.bin" disabled>
+                <div id="bitFileInfo" class="info"></div>
+            </div>
+
+            <div class="section">
+                <h2>3. Program Device</h2>
+                <div class="btn-group">
+                    <button id="programBitBtn" class="btn" disabled>Program SRAM</button>
+                    <button id="flashBitBtn" class="btn btn-secondary" disabled>Flash to SPI</button>
+                </div>
+                <div id="bitProgress" class="progress-container">
+                    <div id="bitProgressBar" class="progress-bar"></div>
+                </div>
+                <div id="bitStatus" class="status"></div>
+            </div>
         </div>
 
         <div class="section">
