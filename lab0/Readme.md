@@ -1,3 +1,3 @@
 ## block diagram
 
-![Alt text](../imgs/gates.png)
+![Alt text](../imgs/lab0.png)
