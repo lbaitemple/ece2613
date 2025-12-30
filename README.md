@@ -33,6 +33,7 @@ sudo reboot
   
 ![setup step 5](imgs/setup_5.png "Step 5")
 
+![setup step 6](imgs/setup_5.png "Step 6")
 
 # Test the code
 - right click on m_sim (extension file) and run
