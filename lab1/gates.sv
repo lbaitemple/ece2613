@@ -9,9 +9,6 @@ module gates(
 	);
 
 	// Write code starting here ...
-	assign f0 = a0 & b0;   // AND gate
-	assign f1 = a1 | b1;   // OR gate
-	assign f2 = a2 ^ b2;   // XOR gate
-	assign f3 = ~(a3 & b3); // NAND gate
+
 
 endmodule
