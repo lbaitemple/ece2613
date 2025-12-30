@@ -22,10 +22,11 @@ sudo reboot
   
   ```
 
-  ![setup step 1](imgs/setup_1.png] 
+
+![setup step 1](imgs/setup_1.png] 
 
 
-  ![setup step 2](imgs/setup_2.png]
+![setup step 2](imgs/setup_2.png]
 
   ![setup step 3](imgs/setup_3.png]
 
