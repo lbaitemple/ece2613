@@ -22,7 +22,7 @@ sudo reboot
   
   ```
 
-  [](images/setup1.png]
+  !![](imgs/setup1.png]
 
 # Test the code
 - right click on m_sim (extension file) and run
