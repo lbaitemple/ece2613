@@ -12,17 +12,18 @@ sudo sed -i "/#\$nrconf{restart} = 'i';/s/.*/\$nrconf{restart} = 'a';/" /etc/nee
 wget https://raw.githubusercontent.com/aws-samples/robotics-boilerplate/main/install-dcv.sh
 cat ./install-dcv.sh | sudo -E bash -
 
-wget https://github.com/lbaitemple/ece2613/releases/download/v2.0.0/QuartusLiteSetup-23.1std.0.991-linux.run
-wget https://github.com/lbaitemple/ece2613/releases/download/v2.0.0/max10-23.1std.0.991.qdz &
-wget https://github.com/lbaitemple/ece2613/releases/download/v2.0.0/ModelSimSetup-20.1.1.720-linux.run &
+#wget https://github.com/lbaitemple/ece2613/releases/download/v2.0.0/QuartusLiteSetup-23.1std.0.991-linux.run
+#wget https://github.com/lbaitemple/ece2613/releases/download/v2.0.0/max10-23.1std.0.991.qdz &
+#wget https://github.com/lbaitemple/ece2613/releases/download/v2.0.0/ModelSimSetup-20.1.1.720-linux.run &
 
- chmod +x QuartusLiteSetup-23.1std.0.991-linux.run
-./QuartusLiteSetup-23.1std.0.991-linux.run --mode unattended --accept_eula 1 
+
+# chmod +x QuartusLiteSetup-23.1std.0.991-linux.run
+#./QuartusLiteSetup-23.1std.0.991-linux.run --mode unattended --accept_eula 1 
 # aws s3 cp s3://intellb/max10-23.1std.0.991.qdz .
 # aws s3 cp s3://intellb/QuartusLiteSetup-23.1std.0.991-linux.run .
 # aws s3 cp s3://intellb/ModelSimSetup-20.1.1.720-linux.run .
- chmod +x ModelSimSetup-20.1.1.720-linux.run
-./ModelSimSetup-20.1.1.720-linux.run --mode unattended --accept_eula 1 
+# chmod +x ModelSimSetup-20.1.1.720-linux.run
+#./ModelSimSetup-20.1.1.720-linux.run --mode unattended --accept_eula 1 
 #sudo  apt-get install libxft2 libxft2:i386 libxrender1:i386 libxtst6:i386 libxi6:i386 -y
 # aws s3 cp s3://intellb/backdoor.zip .
 #gdown --id 1ESAcilkTnWTU6mUQ7irp1BWktr8h110n --output  backdoor.zip
