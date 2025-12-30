@@ -22,15 +22,16 @@ sudo reboot
   
   ```
 
-  ![setup step 1](imgs/setup1.png]
+  ![setup step 1](imgs/setup_1.png] 
 
-  ![setup step 2](imgs/setup2.png]
 
-  ![setup step 3](imgs/setup3.png]
+  ![setup step 2](imgs/setup_2.png]
 
-  ![setup step 4](imgs/setup4.png]
+  ![setup step 3](imgs/setup_3.png]
+
+  ![setup step 4](imgs/setup_4.png]
   
-  ![setup step 5](imgs/setup5.png]
+  ![setup step 5](imgs/setup_5.png]
 
 # Test the code
 - right click on m_sim (extension file) and run
