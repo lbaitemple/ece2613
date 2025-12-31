@@ -7,7 +7,8 @@ cp settings.json ~/.vscode-server/data/Machine
 rm -rf ~/.git
 rm -rf .git
 
-for i in lab1 lab2 lab3 lab4 lab5 lab5a lab6 lab6a lab7a lab8 lego/lab17 lego/lab18 lego/lab19
+#for i in lab1 lab2 lab3 lab4 lab5 lab5a lab6 lab6a lab7a lab8 lego/lab17 lego/lab18 lego/lab19
+for i in lab1 
 do
    cp ./bb_extra_files/$i/* $i/
    cp ./pynq_extra_files/$i/* $i/
