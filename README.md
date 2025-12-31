@@ -28,18 +28,28 @@ sudo reboot
   
   ```
 
-![setup step 1](imgs/setup_1.png "Step 1")
+## Log in using your AMD credential
 
+![setup step 1](imgs/setup_01.png "Step 1")
 
-![setup step 2](imgs/setup_2.png "Step 2")
+## Select vivado installation
 
-![setup step 3](imgs/setup_3.png "Step 3")
+![setup step 2](imgs/setup_02.png "Step 2")
 
-![setup step 4](imgs/setup_4.png "Step 4")
+![setup step 3](imgs/setup_03.png "Step 3")
+
+![setup step 4](imgs/setup_04.png "Step 4")
   
-![setup step 5](imgs/setup_5.png "Step 5")
+![setup step 5](imgs/setup_05.png "Step 5")
 
-![setup step 6](imgs/setup_5.png "Step 6")
+![setup step 6](imgs/setup_06.png "Step 6")
+
+![setup step 7](imgs/setup_07.png "Step 6")
+
+![setup step 8](imgs/setup_08.png "Step 6")
+
+![setup step 9](imgs/setup_09.png "Step 6")
+
 
 # Test the code
 - right click on m_sim (extension file) and run
