@@ -13,7 +13,9 @@ Instruction is provided at https://sites.google.com/a/temple.edu/ece2612/home/cl
 
 ## please use username **ubuntu** for the installation
 ```
-wsl --install ubuntu-22.04
+multipass launch 24.04 --name ubuntu-24 --disk 20G
+multipass shell ubuntu-24
+
 ```
 # login WSL
 ```
