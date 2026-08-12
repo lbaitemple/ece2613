@@ -11,7 +11,7 @@
       "set -e",
       "quartus_sh --flow compile $file_base_name",
       "quartus_cpf  -c -q 1MHz -g 3.3 -n p output_files/$file_base_name.sof output_files/$file_base_name.svf",
-      "quartus_cpf  -c -q 1MHz -g 3.3 -n p output_files/$file_base_name.sof output_files/$file_base_name.p.svf",
+      "quartus_cpf  -c -q 1MHz -g 3.3 -n p output_files/$file_base_name.pof output_files/$file_base_name.p.svf",
       // clean up vcd files
       "rm -rf *.vcd *.lxt2"
     ],
