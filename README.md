@@ -9,7 +9,7 @@ sudo reboot
 After the reboot, you can do the following
 
 ```
-git clone -b cloud9 https://github.com/lbaitemple/ece2613 
+git clone -b aws https://github.com/lbaitemple/ece2613 
 cd ece2613
 bash ./setup.bash 
 sudo reboot
