@@ -1,5 +1,5 @@
 echo 'umask 027'>> ~/.bash_profile
-echo "export ECE2612=/data/courses/ece_2612">> ~/.bash_profile
+echo "export ECE2612=home/ubuntu/ece2613/backdoor">> ~/.bash_profile
 echo 'PATH=$PATH:$ECE2612/bin'>> ~/.bash_profile
 
 # Add pof2svf only if it does not already exist
