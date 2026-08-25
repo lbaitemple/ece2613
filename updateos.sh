@@ -32,4 +32,4 @@ do
    cp ./intel_extra_files_2020f/$i/* $i/
 done
 
-alias quartus_cpf  -c -q 1MHz -g 3.3 -n p output_files/$file_base_name.pof output_files/$file_base_name.p.svf
+#alias quartus_cpf  -c -q 1MHz -g 3.3 -n p output_files/$file_base_name.pof output_files/$file_base_name.p.svf
