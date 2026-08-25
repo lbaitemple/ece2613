@@ -1,4 +1,5 @@
 export DEBIAN_FRONTEND=noninteractive
+sudo apt install unzip -y
  #wget https://raw.githubusercontent.com/lbaitemple/mangdang/main/install-resize.sh
 #wget https://raw.githubusercontent.com/lbaitemple/ece2613/refs/heads/cloud9/install-resize.sh
 # cat ./install-resize.sh   | sudo -E bash -
