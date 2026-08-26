@@ -3,10 +3,13 @@ Instruction is provided at https://sites.google.com/a/temple.edu/ece2612/home/cl
 
 Download VScode (https://code.visualstudio.com/Download)
 find the following extensions
-wsl
+
 remote ssh
+
 code runner
+
 wavetrace
+
 SystemVerilog - Language Support
 
 
