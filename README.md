@@ -1,5 +1,14 @@
-# Cloud 9 setup
+# AWS EC2 setup
 Instruction is provided at https://sites.google.com/a/temple.edu/ece2612/home/cloud9-setup
+
+Download VScode (https://code.visualstudio.com/Download)
+find the following extensions
+wsl
+remote ssh
+code runner
+wavetrace
+SystemVerilog - Language Support
+
 
 # after you select the instance for cloud9, in the terminal
 ```
