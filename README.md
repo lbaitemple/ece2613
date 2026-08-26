@@ -13,15 +13,17 @@ Instruction is provided at https://sites.google.com/a/temple.edu/ece2612/home/cl
 
 ## please use username **ubuntu** for the installation
 ```
-wsl --install ubuntu-22.04
+wsl --install Ubuntu-24.04
 ```
 # login WSL
 ```
-wsl -d ubuntu-22.04
+wsl -d Ubuntu-24.04
 ```
 
 # Install the setup
 ```
+mkdir -p ~/environment
+cd ~/environment
 git clone -b wsl https://github.com/lbaitemple/ece2613 
 cd ece2613
 bash ./setup.bash 
