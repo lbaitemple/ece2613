@@ -1,10 +1,13 @@
 {
-   "code-runner.executorMapByFileExtension": {
+    "code-runner.executorMapByFileExtension": {
         ".sim": "$ECE2612/backdoor/simulate $fileNameWithoutExt",
         ".tcl": "$ECE2612/backdoor/synthesize $fileNameWithoutExt",
         ".m_sim": "$ECE2612/backdoor/ms_simulate $fileNameWithoutExt",
-        ".qsf": "$ECE2612/backdoor/q_synthesize $fileNameWithoutExt",        
+        ".qsf": "$ECE2612/backdoor/q_synthesize $fileNameWithoutExt && quartus_cpf -c -q 1MHz -g 3.3 -n p output_files/$fileNameWithoutExt.sof output_files/$fileNameWithoutExt.svf && quartus_cpf -c -q 1MHz -g 3.3 -n p output_files/$fileNameWithoutExt.pof output_files/$fileNameWithoutExt.p.svf",
+        ".sof": "quartus_cpf -c -q 1MHz -g 3.3 -n p \"$fullFileName\" \"$dir/$fileNameWithoutExt.svf\"",
+        ".pof": "quartus_cpf -c -q 1MHz -g 3.3 -n p \"$fullFileName\" \"$dir/$fileNameWithoutExt.p.svf\""
     },
+
     "code-runner.fileDirectoryAsCwd": true,
     "code-runner.clearPreviousOutput": true,
     "code-runner.runInTerminal": true,
