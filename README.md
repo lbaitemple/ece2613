@@ -29,6 +29,20 @@ cd ece2613
 bash ./setup.bash 
 ```
 
+# install vs code extension and start vs code
+
+## first time start vscode in the shell
+```
+code --install-extension ms-vscode-remote.remote-wsl
+```
+
+## in the future
+
+```
+cd ~/enviroment
+code .
+```
+
 # Test the code
 - right click on m_sim (extension file) and run
 
