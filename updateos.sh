@@ -41,7 +41,7 @@ while IFS= read -r -d '' lab_dir; do
     find "$lab_dir" -type f \( \
         -name '*.sim' -o \
         -name '*.xdc' -o \
-        -name 'top_io_wrapper.*' -o \
+        -name '*top_io_wrapper.*' -o \
         -name 'hf*' \
     \) -print -delete
 done
