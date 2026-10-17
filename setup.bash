@@ -14,8 +14,8 @@ sudo apt install unzip -y
 #cat ./install-dcv.sh | sudo -E bash -
 
 wget https://github.com/lbaitemple/ece2613/releases/download/v2.0.0/QuartusLiteSetup-23.1std.0.991-linux.run
-wget https://github.com/lbaitemple/ece2613/releases/download/v2.0.0/max10-23.1std.0.991.qdz &
-wget https://github.com/lbaitemple/ece2613/releases/download/v2.0.0/ModelSimSetup-20.1.1.720-linux.run &
+wget https://github.com/lbaitemple/ece2613/releases/download/v2.0.0/max10-23.1std.0.991.qdz 
+wget https://github.com/lbaitemple/ece2613/releases/download/v2.0.0/ModelSimSetup-20.1.1.720-linux.run 
 
  chmod +x QuartusLiteSetup-23.1std.0.991-linux.run
 ./QuartusLiteSetup-23.1std.0.991-linux.run --mode unattended --accept_eula 1 
